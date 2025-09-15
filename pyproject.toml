@@ -1,0 +1,11 @@
+[project]
+name = "graph-json"
+version = "0.1.0"
+description = "Python reference implementation of Graph-JSON"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [{name = "Example Author", email = "author@example.com"}]
+
+[project.urls]
+homepage = "https://github.com/yourname/graph-json"
