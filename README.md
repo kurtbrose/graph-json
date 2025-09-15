@@ -6,3 +6,4 @@ Currently implemented in:
 - Python (`python/`)
 - TypeScript (`typescript/`)
 - Ruby (`ruby/`)
+- Rust (`rust/`)
