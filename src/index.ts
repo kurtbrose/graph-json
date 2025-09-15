@@ -72,6 +72,7 @@ export function deflate(value: any): any {
 
 export function inflate(value: any): any {
   const refMap = new Map<number, any>();
+  const owners = new Set<number>();
 
   function walk(node: any): any {
     if (isPrimitive(node)) {
@@ -90,15 +91,22 @@ export function inflate(value: any): any {
         if (!Number.isInteger(n) || n <= 0 || n > MAX_REF_ID) {
           throw new Error('invalid ref id');
         }
+        if (owners.has(n)) {
+          throw new Error('ref object with extra members');
+        }
         let out: any;
         if (refMap.has(n)) {
           out = refMap.get(n);
+          if (items.length > 1) {
+            throw new Error('ref object with extra members');
+          }
         } else {
           out = [];
           refMap.set(n, out);
-        }
-        for (let i = 1; i < items.length; i++) {
-          out.push(walk(items[i]));
+          owners.add(n);
+          for (let i = 1; i < items.length; i++) {
+            out.push(walk(items[i]));
+          }
         }
         return out;
       }
@@ -108,11 +116,16 @@ export function inflate(value: any): any {
       const keys = Object.keys(node);
       if (keys.length === 1 && keys[0] === '#') {
         const n = (node as any)['#'];
-        const existing = refMap.get(n);
-        if (!existing) {
-          throw new Error('unknown ref id');
+        if (!Number.isInteger(n) || n <= 0 || n > MAX_REF_ID) {
+          throw new Error('invalid ref id');
         }
-        return existing;
+        const existing = refMap.get(n);
+        if (existing) {
+          return existing;
+        }
+        const placeholder: any = {};
+        refMap.set(n, placeholder);
+        return placeholder;
       }
       let n: number | undefined;
       let obj: Record<string, any> = node as any;
@@ -121,9 +134,12 @@ export function inflate(value: any): any {
         if (!Number.isInteger(value) || value <= 0 || value > MAX_REF_ID) {
           throw new Error('invalid ref id');
         }
-        n = value;
+        n = value as number;
         obj = { ...obj };
         delete obj['#'];
+        if (owners.has(n)) {
+          throw new Error('ref object with extra members');
+        }
       }
       let out: any = {};
       if (n !== undefined) {
@@ -132,6 +148,7 @@ export function inflate(value: any): any {
         } else {
           refMap.set(n, out);
         }
+        owners.add(n);
       }
       for (const [k, v] of Object.entries(obj)) {
         let key = k;
@@ -145,7 +162,13 @@ export function inflate(value: any): any {
     throw new TypeError(`Unsupported type: ${typeof node}`);
   }
 
-  return walk(value);
+  const result = walk(value);
+  for (const n of refMap.keys()) {
+    if (!owners.has(n)) {
+      throw new Error('unknown ref id');
+    }
+  }
+  return result;
 }
 
 export function dumps(value: any, replacer?: any, space?: string | number): string {
