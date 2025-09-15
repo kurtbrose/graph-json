@@ -1,0 +1,51 @@
+{
+  "correct": {
+    "basic-alias": {
+      "doc": {
+        "a": { "#": 1 },
+        "b": { "#": 1 },
+        "owner": { "#": 1, "k": 42, "##": "ok" }
+      },
+      "aliases": [
+        ["/a", "/b", "/owner"]
+      ]
+    },
+    "self-loop": {
+      "doc": { "n": { "#": 2, "loop": { "#": 2 } } },
+      "aliases": [
+        ["/n", "/n/loop"]
+      ]
+    },
+    "mutual-cycle": {
+      "doc": {
+        "x": { "#": 3 },
+        "y": { "#": 4 },
+        "owners": [
+          { "#": 3, "p": { "#": 4 } },
+          { "#": 4, "p": { "#": 3 } }
+        ]
+      },
+      "aliases": [
+        ["/x", "/owners/0"],
+        ["/y", "/owners/1"],
+        ["/owners/0/p", "/owners/1"],
+        ["/owners/1/p", "/owners/0"]
+      ]
+    },
+    "escape-keys": {
+      "doc": {
+        "obj": { "#": 5, "##": "literal", "###": "double" },
+        "alias": { "#": 5 }
+      },
+      "aliases": [["/obj", "/alias"]],
+      "expect-keys": { "/obj": ["#", "##"] }
+    }
+  },
+  "invalid": {
+    "nonpositive":        { "doc": { "r": { "#": 0 } } },
+    "noninteger":         { "doc": { "r": { "#": "1" } } },
+    "duplicate-owner-id": { "doc": { "o1": { "#": 7, "k": 1 }, "o2": { "#": 7, "k": 2 } } },
+    "ref-with-extras":    { "doc": { "w": { "#": 9, "also": 1 } } },
+    "ref-to-missing":     { "doc": { "z": { "#": 11 } } }
+  }
+}

@@ -69,6 +69,7 @@ def deflate(value):
 def inflate(value):
     """Inflate a Graph-JSON structure back into a Python object graph."""
     ref_map = {}
+    owners = set()
 
     def walk(node):
         if _is_primitive(node):
@@ -79,13 +80,18 @@ def inflate(value):
                 n = items[0]["#"]
                 if not isinstance(n, int) or n <= 0 or n > _MAX_REF_ID:
                     raise ValueError("invalid ref id")
+                if n in owners:
+                    raise ValueError("ref object with extra members")
                 if n in ref_map:
                     out = ref_map[n]
+                    if len(items) > 1:
+                        raise ValueError("ref object with extra members")
                 else:
                     out = []
                     ref_map[n] = out
-                for item in items[1:]:
-                    out.append(walk(item))
+                    owners.add(n)
+                    for item in items[1:]:
+                        out.append(walk(item))
                 return out
             out_list = []
             for item in items:
@@ -94,21 +100,29 @@ def inflate(value):
         if isinstance(node, dict):
             if set(node.keys()) == {"#"}:
                 n = node["#"]
-                if n not in ref_map:
-                    raise ValueError("unknown ref id")
-                return ref_map[n]
+                if not isinstance(n, int) or n <= 0 or n > _MAX_REF_ID:
+                    raise ValueError("invalid ref id")
+                if n in ref_map:
+                    return ref_map[n]
+                placeholder = {}
+                ref_map[n] = placeholder
+                return placeholder
             n = None
             if "#" in node:
                 n = node["#"]
                 if not isinstance(n, int) or n <= 0 or n > _MAX_REF_ID:
                     raise ValueError("invalid ref id")
                 node = {k: v for k, v in node.items() if k != "#"}
-            out = {}
-            if n is not None:
+                if n in owners:
+                    raise ValueError("ref object with extra members")
                 if n in ref_map:
                     out = ref_map[n]
                 else:
+                    out = {}
                     ref_map[n] = out
+                owners.add(n)
+            else:
+                out = {}
             for k, v in node.items():
                 key = k
                 if key and key[0] == "#" and key.count("#") == len(key):
@@ -117,7 +131,11 @@ def inflate(value):
             return out
         raise TypeError(f"Unsupported type: {type(node)!r}")
 
-    return walk(value)
+    result = walk(value)
+    unresolved = set(ref_map.keys()) - owners
+    if unresolved:
+        raise ValueError("unknown ref id")
+    return result
 
 
 def dumps(value, **kwargs):
