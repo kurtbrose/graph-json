@@ -1,0 +1,27 @@
+{
+  "name": "graph-json",
+  "version": "0.1.0",
+  "description": "Graph-JSON encoder/decoder in TypeScript",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourname/graph-json"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && mv dist-cjs/index.js dist/index.cjs && rm -r dist-cjs",
+    "test": "npm run build && node test/test.cjs"
+  }
+}
