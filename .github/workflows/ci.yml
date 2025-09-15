@@ -13,7 +13,8 @@ jobs:
         with:
           python-version: '3.x'
       - run: pip install pytest
-      - run: PYTHONPATH=. pytest
+      - run: pytest
+        working-directory: python
 
   node:
     runs-on: ubuntu-latest
@@ -23,4 +24,15 @@ jobs:
         with:
           node-version: '20'
       - run: npm install --no-save typescript
+        working-directory: typescript
       - run: npm test
+        working-directory: typescript
+
+  ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - run: ruby ruby/test.rb

@@ -19,7 +19,7 @@ def _resolve(obj, pointer):
             cur = cur[part]
     return cur
 
-with open(Path(__file__).with_name('golden.json')) as f:
+with open(Path(__file__).resolve().parents[2] / 'tests' / 'golden.json') as f:
     GOLDEN = json.load(f)
 
 @pytest.mark.parametrize('name,case', GOLDEN['correct'].items())

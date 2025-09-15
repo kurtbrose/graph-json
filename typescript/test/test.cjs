@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { loads } = require('../dist/index.cjs');
 
-const GOLDEN = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'tests', 'golden.json'), 'utf8'));
+const GOLDEN = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'tests', 'golden.json'), 'utf8'));
 
 function resolve(obj, pointer) {
   const parts = pointer.split('/').slice(1).map(p => p.replace(/~1/g, '/').replace(/~0/g, '~'));
