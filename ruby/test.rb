@@ -1,5 +1,5 @@
 require 'json'
-require_relative '../ruby/graph_json'
+require_relative './graph_json'
 
 GOLDEN = JSON.parse(File.read(File.join(__dir__, '..', 'tests', 'golden.json')))
 
