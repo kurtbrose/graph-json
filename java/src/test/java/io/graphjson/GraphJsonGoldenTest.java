@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -30,7 +31,7 @@ public class GraphJsonGoldenTest {
 
     @Test
     public void testGoldenCorrect() throws Exception {
-        Path goldenPath = Path.of("..", "tests", "golden.json").toAbsolutePath().normalize();
+        Path goldenPath = Paths.get("..", "tests", "golden.json").toAbsolutePath().normalize();
         Map<String,Object> golden = MAPPER.readValue(Files.newBufferedReader(goldenPath), new TypeReference<Map<String,Object>>(){});
         Map<String,Object> correct = castMap(golden.get("correct"));
         for (Map.Entry<String,Object> entry : correct.entrySet()) {
@@ -62,7 +63,7 @@ public class GraphJsonGoldenTest {
 
     @Test
     public void testGoldenInvalid() throws Exception {
-        Path goldenPath = Path.of("..", "tests", "golden.json").toAbsolutePath().normalize();
+        Path goldenPath = Paths.get("..", "tests", "golden.json").toAbsolutePath().normalize();
         Map<String,Object> golden = MAPPER.readValue(Files.newBufferedReader(goldenPath), new TypeReference<Map<String,Object>>(){});
         Map<String,Object> invalid = castMap(golden.get("invalid"));
         for (Map.Entry<String,Object> entry : invalid.entrySet()) {
